@@ -18,6 +18,7 @@
     "dev-mode:available": "node ./node_modules/oskari-frontend/scripts/oskari-dev-mode-requirements",
     "dev-mode:clean": "(rm -r node_modules || true) && (rm package-lock.json || true)",
     "build": "webpack --config ./node_modules/oskari-frontend/webpack.config.js --mode production --progress --env.appdef=apps --env.absolutePublicPath=true",
+    "build:test": "webpack --config ./node_modules/oskari-frontend/webpack.config.js --mode production --progress --env.appdef=apps --env.absolutePublicPath=true --env.domain=https://kartat.tampere.fi/oskaritest",
     "start": "webpack-dev-server --config ./node_modules/oskari-frontend/webpack.config.js --hot --env.appdef=devapp:apps --env.absolutePublicPath=true",
     "start:dev": "npm run dev-mode:on && node ./node_modules/oskari-frontend/node_modules/webpack-dev-server/bin/webpack-dev-server.js --config ./node_modules/oskari-frontend/webpack.config.js --hot --env.appdef=devapp:apps --env.absolutePublicPath=true",
     "build:dev": "npm run dev-mode:on && node ./node_modules/oskari-frontend/node_modules/webpack/bin/webpack.js --config ./node_modules/oskari-frontend/webpack.config.js --mode production --progress --env.appdef=apps --env.absolutePublicPath=true",
