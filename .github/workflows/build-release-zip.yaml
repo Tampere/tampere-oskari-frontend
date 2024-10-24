@@ -1,0 +1,30 @@
+name: Build and release tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  push-store-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
+      - name: 'Build Inventory Image'
+        run: |
+          docker build . --tag tre-oskari-${{ github.ref_name }}
+      - name: 'Extract project from image'
+        run: |
+          id=$(docker create tre-oskari-${{ github.ref_name }})
+          docker cp $id:/opt/oskari/dist - | gzip > oskari-frontend-${{ github.ref_name }}.tar.gz
+          docker rm -v $id
+      - name: Upload Release Asset
+        uses: alexellis/upload-assets@0.4.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          asset_paths: '[ "./oskari-frontend-*" ]'
