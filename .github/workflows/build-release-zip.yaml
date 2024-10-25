@@ -22,9 +22,8 @@ jobs:
           id=$(docker create tre-oskari-${{ github.ref_name }})
           docker cp $id:/opt/oskari/dist - | gzip > oskari-frontend-${{ github.ref_name }}.tar.gz
           docker rm -v $id
-      - name: Upload Release Asset
-        uses: alexellis/upload-assets@0.4.0
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          ls -la
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          asset_paths: '[ "./oskari-frontend-*" ]'
+          files: oskari-frontend-${{ github.ref_name }}.tar.gz
