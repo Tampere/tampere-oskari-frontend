@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  save-:
+  build-dist-packages:
     runs-on: ubuntu-latest
     permissions:
       contents: read
