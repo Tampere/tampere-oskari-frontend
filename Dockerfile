@@ -32,7 +32,8 @@ FROM nginx:1.27-alpine-slim
 
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=certimage /opt/*.pem /etc/ssl/private/
-COPY --from=buildimage /opt/oskari/dist /var/www/html/dist
+
+COPY --from=buildimage /opt/oskari/dist /opt/oskari/dist
 
 
 
