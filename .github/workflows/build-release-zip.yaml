@@ -20,7 +20,7 @@ jobs:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
       - name: 'Force tag to package version'
-        run: npm version ${{ github.ref_name }}
+        run: npm version ${{ github.ref_name }} || echo "Version already correct"
 
 # Create a gzip file containing the built frontend
       - name: 'Build production Inventory Image'
