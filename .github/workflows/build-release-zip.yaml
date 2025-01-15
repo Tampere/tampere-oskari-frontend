@@ -3,7 +3,7 @@ name: Build and release tag
 on:
   push:
     tags:
-      - "v*"
+      - "*"
 
 permissions:
   contents: write
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
+      - name: 'Force tag to package version'
+        run: npm version ${{ github.ref_name }}
 
 # Create a gzip file containing the built frontend
       - name: 'Build production Inventory Image'
