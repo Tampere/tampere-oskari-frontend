@@ -23,7 +23,7 @@ jobs:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
       - name: 'Force tag to package version'
-        run: npm version ${{ github.ref_name }}
+        run: npm version --allow-same-version=true --git-tag-version=false ${{ github.ref_name }}
       - name: 'Login to GitHub Container Registry'
         uses: docker/login-action@v3
         with:
