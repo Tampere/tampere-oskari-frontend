@@ -1,4 +1,4 @@
-FROM node:18-bullseye as buildimage
+FROM docker.io/library/node:18-bullseye as buildimage
 # Use bullseye, because python 3.11 causes problems. Bullseye has python 3.9
 
 RUN  export DEBIAN_FRONTEND=noninteractive && apt-get update \
@@ -22,17 +22,19 @@ COPY .eslintrc.js ./
 ARG BUILD_TARGET=build
 RUN npm run $BUILD_TARGET
 
-FROM node:18-bullseye as certimage
+FROM docker.io/library/node:18-bullseye as certimage
 
 WORKDIR /opt
 # Build self signed cert for ssl
 RUN openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=FI/ST=Pirkanmaa/L=Tampere/O=Tampere/OU=Paikkatieto/CN=kartat.tampere.fi"
 
-FROM nginx:1.27-alpine-slim
+FROM docker.io/library/nginx:1.27-alpine-slim
 
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/copy-oskari-data.sh /docker-entrypoint.d/
+
 COPY --from=certimage /opt/*.pem /etc/ssl/private/
-COPY --from=buildimage /opt/oskari/dist /var/www/html/dist
+COPY --from=buildimage /opt/oskari/dist /opt/oskari/dist
 
 
 
