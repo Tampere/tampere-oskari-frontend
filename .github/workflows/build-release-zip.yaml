@@ -3,7 +3,7 @@ name: Build and release tag
 on:
   push:
     tags:
-      - "v*"
+      - "*"
 
 permissions:
   contents: write
@@ -11,6 +11,10 @@ permissions:
 jobs:
   build-dist-packages:
     runs-on: ubuntu-latest
+    env:
+
+      PROD_IMAGE: "ghcr.io/${{ github.repository }}/tre-oskari-${{ github.ref_name }}-prod"
+      TEST_IMAGE: "ghcr.io/${{ github.repository }}/tre-oskari-${{ github.ref_name }}-test"
     permissions:
       contents: write
       packages: write
@@ -19,22 +23,33 @@ jobs:
     steps:
       - name: 'Checkout GitHub Action'
         uses: actions/checkout@main
+      - name: 'Force tag to package version'
+        run: npm version ${{ github.ref_name }}
+
+      - name: 'Login to GitHub Container Registry'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
 # Create a gzip file containing the built frontend
       - name: 'Build production Inventory Image'
         run: |
-          docker build . --target buildimage --tag tre-oskari-${{ github.ref_name }}-prod --build-arg BUILD_TARGET=build
+          docker build . --target buildimage --tag $PROD_IMAGE --build-arg BUILD_TARGET=build
+          docker push $PROD_IMAGE
       - name: 'Build test Inventory Image'
         run: |
-          docker build . --target buildimage --tag tre-oskari-${{ github.ref_name }}-test --build-arg BUILD_TARGET=build:test
+          docker build . --target buildimage --tag $TEST_IMAGE --build-arg BUILD_TARGET=build:test
+          docker push $TEST_IMAGE
       - name: 'Extract production gzip'
         run: |
-          id=$(docker create tre-oskari-${{ github.ref_name }}-prod)
+          id=$(docker create $PROD_IMAGE)
           docker cp $id:/opt/oskari/dist - | gzip > oskari-frontend-${{ github.ref_name }}-prod.tar.gz
           docker rm -v $id
       - name: 'Extract test gzip'
         run: |
-          id=$(docker create tre-oskari-${{ github.ref_name }}-test)
+          id=$(docker create $TEST_IMAGE)
           docker cp $id:/opt/oskari/dist - | gzip > oskari-frontend-${{ github.ref_name }}-test.tar.gz
           docker rm -v $id
       - name: "Release zipped images"
@@ -43,28 +58,3 @@ jobs:
           files: |
             oskari-frontend-${{ github.ref_name }}-prod.tar.gz
             oskari-frontend-${{ github.ref_name }}-test.tar.gz
-
-## Release also a nginx image
-#      - name: 'Login to GitHub Container Registry'
-#        uses: docker/login-action@v1
-#        with:
-#          registry: ghcr.io
-#          username: ${{github.actor}}
-#          password: ${{secrets.GITHUB_TOKEN}}
-#
-#      - name: Extract metadata (tags, labels) for Docker
-#        id: meta
-#        uses: docker/metadata-action@v5
-#        with:
-#          images: ghcr.io/${{ github.repository }}
-#
-#      - name: Build and push Docker image
-#        id: push
-#        uses: docker/build-push-action@v6
-#        with:
-#          context: .
-#          file: ./Dockerfile
-#          push: true
-#          tags: ${{ steps.meta.outputs.tags }}
-#          labels: ${{ steps.meta.outputs.labels }}
-#
